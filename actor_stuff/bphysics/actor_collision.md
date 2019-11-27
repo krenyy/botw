@@ -67,6 +67,7 @@ RigidBody_0: !list
 ```
 ---
 There are quite a few things to note:
+
 | Parameter       |        Description        | Values                             |
 | --------------- | :-----------------------: | ---------------------------------- |
 | rigid_body_name |            <--            | "Body" (purpose unknown atm)       |
@@ -79,7 +80,7 @@ There are quite a few things to note:
 | sub_material    | sub material of the shape | String ([Here](sub_materials.yml)) |
 | wall_code       |  wall code of the shape   | String ([Here](wall_codes.yml))    |
 | floor_code      |  floor code of the shape  | String ([Here](floor_codes.yml))   |
----
+___
 ## Shapes
 Lets take a sample model from the game. A ruined Guardian with collision side-by-side:\
 <img src=res/only-model.png width="500"><img src=res/only-collision.png width="500">\
