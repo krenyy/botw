@@ -1,0 +1,6 @@
+shape_type: !str32 'box'
+shape_type: !str32 'capsule'
+shape_type: !str32 'character_prism'
+shape_type: !str32 'cylinder'
+shape_type: !str32 'polytope'
+shape_type: !str32 'sphere'

@@ -1,0 +1,5 @@
+wall_code: !str32 Dummy
+wall_code: !str32 Hang
+wall_code: !str32 NoClimb
+wall_code: !str32 NoDashUpAndNoClimb
+wall_code: !str32 None

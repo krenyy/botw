@@ -1,0 +1,3 @@
+motion_type: !str32 Dynamic
+motion_type: !str32 Fixed
+motion_type: !str32 Keyframed
