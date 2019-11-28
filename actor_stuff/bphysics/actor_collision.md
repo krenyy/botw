@@ -89,5 +89,5 @@ Considering the collision is defined by **vertices** alone (which means you can 
 <img src=res/collision-error.png width="500">
 ___
 ## Vertices
-Each `vertex_x` point defines a single vertex in a 3-dimensional space. What you can do for the time being is exporting a model as `.obj` and modifying all `v x y z` to the correct format.
+Each `vertex_x` point defines a single vertex in a 3-dimensional space. ~~What you can do for the time being is exporting a model as `.obj` and modifying all `v x y z` to the correct format.~~ I since wrote a simple script to export Blender objects as RigidBody shapes in the correct format. Though you still need to simplify and split your mesh to convex shape objects (As shown in the picture above) before running it. [Here's the script](scripts/blender_test_script.py)
 
