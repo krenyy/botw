@@ -7,7 +7,7 @@ objs = [obj for obj in scene.objects]
 output = ""
 
 for i, obj in enumerate(objs):
-    output += f"ShapeParam_{i}: !obj # {obj.name} <- Remove this once done editing. (WITH THE HASHTAG)\n"
+    output += f"ShapeParam_{i}: !obj # {obj.name}"
     output += "  shape_type: !str32 polytope\n"
     output += f"  vertex_num: {len(obj.data.vertices)}\n"
     for i, vertex in enumerate(obj.data.vertices):
