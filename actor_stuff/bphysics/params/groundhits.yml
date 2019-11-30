@@ -1,0 +1,9 @@
+groundhit: !str32 Animal
+groundhit: !str32 Arrow
+groundhit: !str32 AttackHitEnemy
+groundhit: !str32 CameraBody
+groundhit: !str32 Giant
+groundhit: !str32 HitAll
+groundhit: !str32 MovingTrolley
+groundhit: !str32 NPC
+groundhit: !str32 Player

@@ -1,0 +1,7 @@
+navmesh_sub_material: !str32 
+navmesh_sub_material: !str32 Fire
+navmesh_sub_material: !str32 GiantNoEntry
+navmesh_sub_material: !str32 LiftableByEnemy
+navmesh_sub_material: !str32 NPCOnly
+navmesh_sub_material: !str32 Others
+navmesh_sub_material: !str32 Pass

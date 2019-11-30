@@ -70,16 +70,18 @@ There are quite a few things to note:
 
 | Parameter       |        Description        | Values                             |
 | --------------- | :-----------------------: | ---------------------------------- |
-| rigid_body_name |            <--            | "Body" (purpose unknown atm)       |
-| motion_type     |    Actor movement type    | String ([Here](motion_types.yml))  |
+| rigid_body_name |      Rigid body name      | String                             |
+| motion_type     |    Actor movement type    | [String](params/motion_types.yml)  |
 | shape_num       |     number of shapes      | Integer (more info below)          |
-| shape_type      |     basic shape type      | String ([Here](shape_types.yml))   |
+| shape_type      |     basic shape type      | [String](params/shape_types.yml)   |
 | vertex_num      |    number of vertices     | Integer (more info below)          |
 | vertex_x        |    vertex coordinates     | Vector3 (more info below)          |
-| material        |   material of the shape   | String ([Here](materials.yml))     |
-| sub_material    | sub material of the shape | String ([Here](sub_materials.yml)) |
-| wall_code       |  wall code of the shape   | String ([Here](wall_codes.yml))    |
-| floor_code      |  floor code of the shape  | String ([Here](floor_codes.yml))   |
+| material        |   material of the shape   | [String](params/materials.yml)     |
+| sub_material    | sub material of the shape | [String](params/sub_materials.yml) |
+| wall_code       |  wall code of the shape   | [String](params/wall_codes.yml)    |
+| floor_code      |  floor code of the shape  | [String](params/floor_codes.yml)   |
+
+for more parameters click [here](params)
 ___
 ## Shapes
 Lets take a sample model from the game. A ruined Guardian with collision side-by-side:\
@@ -88,6 +90,9 @@ ___
 Considering the collision is defined by **vertices** alone (which means you can consider the vertices all interconnected), this concrete shape must be sliced to two to avoid wrongly connected vertices in in-game collision.\
 <img src=res/collision-error.png width="500">
 ___
-## Vertices
-Each `vertex_x` point defines a single vertex in a 3-dimensional space. ~~What you can do for the time being is exporting a model as `.obj` and modifying all `v x y z` to the correct format.~~ I since wrote a simple script to export Blender objects as RigidBody shapes in the correct format. Though you still need to simplify and split your mesh to convex shape objects (As shown in the picture above) before running it. [Here's the script](scripts/blender_test_script.py)
+## Shapes and vertices
+Each `vertex_{}` point defines a single point in a 3-dimensional space.
 
+I wrote a [Blender addon](scripts) for exporting objects as separate shapes. For simple shapes (cubes), split them yourself, for more complex ones, use [V-HACD Blender addon](https://github.com/andyp123/blender_vhacd).
+#### For now it's not recommended to change `shape_type` unless you know what you're doing.
+___
