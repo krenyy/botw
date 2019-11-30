@@ -42,10 +42,10 @@ def generate_physics(context, filepath, binary=False):
     if binary:
         filepath_yml = filepath.replace(".bphysics", ".physics.yml")
         filepath_bin = filepath
-        filepath_obj = filepath.replace(".bphysics", ".obj")
+        filepath_obj = filepath + ".obj"
     else:
         filepath_yml = filepath
-        filepath_obj = filepath.replace(".physics.yml", ".obj")
+        filepath_obj = filepath + ".obj"
     script_file = os.path.realpath(__file__)
     directory = os.path.dirname(script_file)
     default_file = directory + "/default.yml"
