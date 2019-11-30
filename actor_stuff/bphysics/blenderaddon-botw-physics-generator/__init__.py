@@ -19,7 +19,7 @@ bl_info = {
     "version": (0, 0, 1),
     "location": "",
     "warning": "",
-    "category": "Generic",
+    "category": "Collision",
 }
 
 import os
@@ -42,16 +42,72 @@ def generate_physics(context, filepath, binary=False):
     if binary:
         filepath_yml = filepath.replace(".bphysics", ".physics.yml")
         filepath_bin = filepath
+        filepath_obj = filepath.replace(".bphysics", ".obj")
     else:
         filepath_yml = filepath
-    scene = bpy.context.scene
+        filepath_obj = filepath.replace(".physics.yml", ".obj")
     script_file = os.path.realpath(__file__)
     directory = os.path.dirname(script_file)
     default_file = directory + "/default.yml"
     with open(default_file, "r") as f:
         content = f.read()
+
+    bpy.ops.export_scene.obj(
+        filepath=filepath_obj,
+        check_existing=True,
+        axis_forward="-Z",
+        axis_up="Y",
+        filter_glob="*.obj;*.mtl",
+        use_selection=False,
+        use_animation=False,
+        use_mesh_modifiers=True,
+        use_edges=False,
+        use_smooth_groups=False,
+        use_smooth_groups_bitflags=False,
+        use_normals=False,
+        use_uvs=False,
+        use_materials=False,
+        use_triangles=True,
+        use_nurbs=False,
+        use_vertex_groups=False,
+        use_blen_objects=True,
+        group_by_object=False,
+        group_by_material=False,
+        keep_vertex_order=False,
+        global_scale=1,
+        path_mode="AUTO",
+    )
+
+    with open(filepath_obj, "r") as obj_file:
+        shapes = []
+        verts = []
+        pruned = ""
+        for line in obj_file.readlines():
+            if line.startswith("o ") or line.startswith("v "):
+                pruned += line
+        for line in pruned.splitlines():
+            if line.startswith("o "):
+                if verts:
+                    try:
+                        shapes.append(verts)
+                        verts = []
+                        continue
+                    except Exception as e:
+                        ShowMessageBox(
+                            "OBJ Parsing Error", f"{e}",
+                        )
+                        return {"CANCELLED"}
+            elif line.startswith("v "):
+                line = line.lstrip("v ")
+                coords = line.split(" ")
+                verts.append(coords)
+            else:
+                print("wat")
+        if verts:
+            shapes.append(verts)
+
     shape_param_template = (
-        "                    ShapeParam_{}: !obj # {}\n"
+        "                    ShapeParam_{}: !obj\n"
         "                      shape_type: !str32 polytope\n"
         "                      vertex_num: {}\n"
         "{}\n"
@@ -61,22 +117,19 @@ def generate_physics(context, filepath, binary=False):
         "                      floor_code: !str32 None\n"
     )
     vertex_template = "                      vertex_{}: !vec3 [{}, {}, {}]"
-    shapes = ""
-    for i, obj in enumerate(scene.objects):
-        mtx = obj.matrix_world
-        v_coords = [mtx @ v.co for v in obj.data.vertices]
-        shapes += shape_param_template.format(
+    shapes_result = ""
+    for i, shape in enumerate(shapes):
+        shapes_result += shape_param_template.format(
             i,
-            obj.name,
-            len(obj.data.vertices),
+            len(shape),
             "\n".join(
                 [
-                    vertex_template.format(o, v.x, v.z, v.y)
-                    for o, v in enumerate(v_coords)
+                    vertex_template.format(o, vert[0], vert[1], vert[2])
+                    for o, vert in enumerate(shape)
                 ]
             ),
         )
-    output = content.format(len(scene.objects), shapes.rstrip("\n"))
+    output = content.format(len(shapes), shapes_result.rstrip("\n"))
     with open(filepath_yml, "w") as output_file:
         output_file.write(output)
 
@@ -92,6 +145,7 @@ def generate_physics(context, filepath, binary=False):
             return {"CANCELLED"}
         finally:
             os.remove(filepath_yml)
+    os.remove(filepath_obj)
     return {"FINISHED"}
 
 
