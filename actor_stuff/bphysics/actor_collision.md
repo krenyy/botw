@@ -85,10 +85,10 @@ for more parameters click [here](params)
 ___
 ## Shapes
 Lets take a sample model from the game. A ruined Guardian with collision side-by-side:\
-<img src=res/only-model.png width="500"><img src=res/only-collision.png width="500">\
+<img src=res/only-model.png width="400"><img src=res/only-collision.png width="400">\
 ___
 Considering the collision is defined by **vertices** alone (which means you can consider the vertices all interconnected), this concrete shape must be sliced to two to avoid wrongly connected vertices in in-game collision.\
-<img src=res/collision-error.png width="500">
+<img src=res/collision-error.png width="400">
 ___
 ## Shapes and vertices
 Each `vertex_{}` point defines a single point in a 3-dimensional space.
@@ -97,7 +97,7 @@ I wrote a [Blender addon](blenderaddon-botw-physics-generator.zip) for exporting
 
 For more complex ones, use [V-HACD Blender addon](https://github.com/andyp123/blender_vhacd). Here's an example of generated convex geometry:
 
-<img src=res/example.png width="500">
+<img src=res/example.png width="400">
 
 ___
 ### For now it's not recommended to change `shape_type` unless you know what you're doing.
