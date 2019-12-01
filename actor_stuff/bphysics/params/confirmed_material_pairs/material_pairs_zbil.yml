@@ -1,0 +1,2 @@
+material: !str32 Rope
+sub_material: !str32 Rope

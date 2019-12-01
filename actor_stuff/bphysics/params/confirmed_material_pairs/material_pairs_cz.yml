@@ -1,0 +1,2 @@
+material: !str32 Wood
+sub_material: !str32 Wood_Thick

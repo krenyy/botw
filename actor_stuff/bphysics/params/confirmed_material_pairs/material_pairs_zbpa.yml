@@ -1,0 +1,2 @@
+material: !str32 Stone
+sub_material: !str32 Stone_Marble

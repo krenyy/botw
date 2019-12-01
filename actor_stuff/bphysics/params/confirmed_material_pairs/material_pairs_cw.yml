@@ -1,0 +1,2 @@
+material: !str32 Soil
+sub_material: !str32 Soil

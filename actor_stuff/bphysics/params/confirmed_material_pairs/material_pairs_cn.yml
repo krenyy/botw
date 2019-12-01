@@ -1,0 +1,2 @@
+material: !str32 Metal
+sub_material: !str32 Metal

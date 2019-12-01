@@ -1,0 +1,2 @@
+material: !str32 Ragdoll
+sub_material: !str32 Ragdoll
