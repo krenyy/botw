@@ -38,6 +38,42 @@ def ShowMessageBox(title, message, icon="INFO"):
     bpy.context.window_manager.popup_menu(draw, title=title, icon=icon)
 
 
+def parse_physics(context, filepath):
+    filepath_obj = filepath + ".obj"
+    output = ""
+    obj_num = 0
+    obj_template = "o Shape_{}\n"
+    vert_template = "v {} {} {}\n"
+
+    with open(filepath, "r") as f:
+        for line in f.readlines():
+            line = line.lstrip()
+            if line.startswith("vertex_num"):
+                output += obj_template.format(obj_num)
+                obj_num += 1
+            elif line.startswith("vertex_"):
+                split = line.split("[")
+                strip = split[1].rstrip("\n")
+                strip = strip.rstrip("]")
+                coords = strip.split(", ")
+                output += vert_template.format(*coords)
+
+    with open(filepath_obj, "w") as f:
+        f.write(output)
+
+    try:
+        bpy.ops.import_scene.obj("EXEC_DEFAULT", filepath=filepath_obj)
+    except Exception as e:
+        print(e)
+        ShowMessageBox(".OBJ Import Error", f"{e}")
+        return {"CANCELLED"}
+    #try:
+    #    os.remove(filepath_obj)
+    #except Exception as e:
+    #    print(e)
+    return {"FINISHED"}
+
+
 def generate_physics(context, filepath, binary=False):
     if binary:
         filepath_yml = filepath.replace(".bphysics", ".physics.yml")
@@ -52,31 +88,36 @@ def generate_physics(context, filepath, binary=False):
     with open(default_file, "r") as f:
         content = f.read()
 
-    bpy.ops.export_scene.obj(
-        filepath=filepath_obj,
-        check_existing=True,
-        axis_forward="-Z",
-        axis_up="Y",
-        filter_glob="*.obj;*.mtl",
-        use_selection=False,
-        use_animation=False,
-        use_mesh_modifiers=True,
-        use_edges=False,
-        use_smooth_groups=False,
-        use_smooth_groups_bitflags=False,
-        use_normals=False,
-        use_uvs=False,
-        use_materials=False,
-        use_triangles=True,
-        use_nurbs=False,
-        use_vertex_groups=False,
-        use_blen_objects=True,
-        group_by_object=False,
-        group_by_material=False,
-        keep_vertex_order=False,
-        global_scale=1,
-        path_mode="AUTO",
-    )
+    try:
+        bpy.ops.export_scene.obj(
+            filepath=filepath_obj,
+            check_existing=True,
+            axis_forward="-Z",
+            axis_up="Y",
+            filter_glob="*.obj;*.mtl",
+            use_selection=False,
+            use_animation=False,
+            use_mesh_modifiers=True,
+            use_edges=False,
+            use_smooth_groups=False,
+            use_smooth_groups_bitflags=False,
+            use_normals=False,
+            use_uvs=False,
+            use_materials=False,
+            use_triangles=True,
+            use_nurbs=False,
+            use_vertex_groups=False,
+            use_blen_objects=True,
+            group_by_object=False,
+            group_by_material=False,
+            keep_vertex_order=False,
+            global_scale=1,
+            path_mode="AUTO",
+        )
+    except Exception as e:
+        print(e)
+        ShowMessageBox(".OBJ Export Error", f"{e}")
+        return {"CANCELLED"}
 
     with open(filepath_obj, "r") as obj_file:
         shapes = []
@@ -102,7 +143,8 @@ def generate_physics(context, filepath, binary=False):
                 coords = line.split(" ")
                 verts.append(coords)
             else:
-                print("wat")
+                ShowMessageBox("???", "Why did this happen?")
+                return {"CANCELLED"}
         if verts:
             shapes.append(verts)
 
@@ -149,13 +191,24 @@ def generate_physics(context, filepath, binary=False):
     return {"FINISHED"}
 
 
+class ImportPhysics(Operator, ExportHelper):
+    """Import BotW Physics File"""
+
+    bl_idname = "import_physics.yml"
+    bl_label = "Import BotW physics file (.yml)"
+    filename_ext = ".yml"
+
+    filter_glob: StringProperty(default="*.yml", options={"HIDDEN"})
+
+    def execute(self, context):
+        return parse_physics(context, self.filepath)
+
+
 class ExportPhysics(Operator, ExportHelper):
     """Export BotW Physics File"""
 
     bl_idname = "export_physics.yml"
     bl_label = "Export BotW physics file (.physics.yml)"
-
-    # ExportHelper mixin class uses this
     filename_ext = ".physics.yml"
 
     filter_glob: StringProperty(default="*.physics.yml", options={"HIDDEN"})
@@ -169,14 +222,16 @@ class ExportPhysicsBinary(Operator, ExportHelper):
 
     bl_idname = "export_bphysics.bphysics"
     bl_label = "Export BotW binary physics file (.bphysics)"
-
-    # ExportHelper mixin class uses this
     filename_ext = ".bphysics"
 
     filter_glob: StringProperty(default="*.bphysics", options={"HIDDEN"})
 
     def execute(self, context):
         return generate_physics(context, self.filepath, binary=True)
+
+
+def MenuImport(self, context):
+    self.layout.operator(ImportPhysics.bl_idname, text="BotW Physics File (.yml)")
 
 
 def MenuExport(self, context):
@@ -189,12 +244,16 @@ def MenuExport(self, context):
 
 
 def register():
+    bpy.utils.register_class(ImportPhysics)
     bpy.utils.register_class(ExportPhysics)
     bpy.utils.register_class(ExportPhysicsBinary)
+    bpy.types.TOPBAR_MT_file_import.append(MenuImport)
     bpy.types.TOPBAR_MT_file_export.append(MenuExport)
 
 
 def unregister():
+    bpy.utils.unregister_class(ImportPhysics)
     bpy.utils.unregister_class(ExportPhysics)
     bpy.utils.unregister_class(ExportPhysicsBinary)
+    bpy.types.TOPBAR_MT_file_import.remove(MenuImport)
     bpy.types.TOPBAR_MT_file_export.remove(MenuExport)
