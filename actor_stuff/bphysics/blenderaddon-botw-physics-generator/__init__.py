@@ -67,10 +67,10 @@ def parse_physics(context, filepath):
         print(e)
         ShowMessageBox(".OBJ Import Error", f"{e}")
         return {"CANCELLED"}
-    #try:
-    #    os.remove(filepath_obj)
-    #except Exception as e:
-    #    print(e)
+    try:
+        os.remove(filepath_obj)
+    except Exception as e:
+        print(e)
     return {"FINISHED"}
 
 
