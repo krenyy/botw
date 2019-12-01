@@ -93,6 +93,11 @@ ___
 ## Shapes and vertices
 Each `vertex_{}` point defines a single point in a 3-dimensional space.
 
-I wrote a [Blender addon](blenderaddon-botw-physics-generator.zip) for exporting objects as separate shapes. For simple shapes (cubes, stairs), split them yourself for better accuracy, for more complex ones, use [V-HACD Blender addon](https://github.com/andyp123/blender_vhacd).
-#### For now it's not recommended to change `shape_type` unless you know what you're doing.
+I wrote a [Blender addon](blenderaddon-botw-physics-generator.zip) for exporting objects as separate shapes. For simple shapes (cubes, stairs), split them yourself for better accuracy.
+
+For more complex ones, use [V-HACD Blender addon](https://github.com/andyp123/blender_vhacd). Here's an example of generated convex geometry:
+
+<img src=res/example.png width="500">
+
 ___
+### For now it's not recommended to change `shape_type` unless you know what you're doing.
