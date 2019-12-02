@@ -4,6 +4,7 @@ sub_material: !str32 CharControl
 sub_material: !str32 Cloth
 sub_material: !str32 Cloth_Leather
 sub_material: !str32 Conveyer
+sub_material: !str32 Glass
 sub_material: !str32 Grass
 sub_material: !str32 Grass_Leaf
 sub_material: !str32 Grass_Long

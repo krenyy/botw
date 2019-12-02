@@ -1,5 +1,6 @@
 floor_code: !str32 Attach
 floor_code: !str32 Dummy
+floor_code: !str32 FlowRight
 floor_code: !str32 FlowStraight
 floor_code: !str32 NarrowPlace
 floor_code: !str32 NoImpulseUpperMove

@@ -4,6 +4,7 @@ material: !str32 Bone
 material: !str32 CharControl
 material: !str32 Cloth
 material: !str32 Conveyer
+material: !str32 Glass
 material: !str32 Grass
 material: !str32 Grudge
 material: !str32 GuardianFoot
