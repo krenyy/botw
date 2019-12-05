@@ -24,8 +24,10 @@ bl_info = {
 
 import os
 import subprocess
+from math import radians
 
 import bpy
+import mathutils
 from bpy.props import BoolProperty, EnumProperty, StringProperty
 from bpy.types import Operator
 from bpy_extras.io_utils import ExportHelper
@@ -74,79 +76,27 @@ def parse_physics(context, filepath):
     return {"FINISHED"}
 
 
-def generate_physics(context, filepath, binary=False):
+def generate_physics(context, filepath, binary=False, vhacd=True, remove_hulls_after_export=False):
+    if vhacd:
+        try:
+            bpy.ops.object.select_all(action='SELECT')
+            bpy.ops.object.vhacd('EXEC_DEFAULT')
+        except Exception as e:
+            ShowMessageBox("V-HACD Error", f"{e}")
+            return {"CANCELLED"}
     if binary:
         filepath_yml = filepath.replace(".bphysics", ".physics.yml")
         filepath_bin = filepath
-        filepath_obj = filepath + ".obj"
     else:
         filepath_yml = filepath
-        filepath_obj = filepath + ".obj"
     script_file = os.path.realpath(__file__)
     directory = os.path.dirname(script_file)
     default_file = directory + "/default.yml"
     with open(default_file, "r") as f:
         content = f.read()
-
-    try:
-        bpy.ops.export_scene.obj(
-            filepath=filepath_obj,
-            check_existing=True,
-            axis_forward="-Z",
-            axis_up="Y",
-            filter_glob="*.obj;*.mtl",
-            use_selection=False,
-            use_animation=False,
-            use_mesh_modifiers=True,
-            use_edges=False,
-            use_smooth_groups=False,
-            use_smooth_groups_bitflags=False,
-            use_normals=False,
-            use_uvs=False,
-            use_materials=False,
-            use_triangles=True,
-            use_nurbs=False,
-            use_vertex_groups=False,
-            use_blen_objects=True,
-            group_by_object=False,
-            group_by_material=False,
-            keep_vertex_order=False,
-            global_scale=1,
-            path_mode="AUTO",
-        )
-    except Exception as e:
-        print(e)
-        ShowMessageBox(".OBJ Export Error", f"{e}")
-        return {"CANCELLED"}
-
-    with open(filepath_obj, "r") as obj_file:
-        shapes = []
-        verts = []
-        pruned = ""
-        for line in obj_file.readlines():
-            if line.startswith("o ") or line.startswith("v "):
-                pruned += line
-        for line in pruned.splitlines():
-            if line.startswith("o "):
-                if verts:
-                    try:
-                        shapes.append(verts)
-                        verts = []
-                        continue
-                    except Exception as e:
-                        ShowMessageBox(
-                            "OBJ Parsing Error", f"{e}",
-                        )
-                        return {"CANCELLED"}
-            elif line.startswith("v "):
-                line = line.lstrip("v ")
-                coords = line.split(" ")
-                verts.append(coords)
-            else:
-                ShowMessageBox("???", "Why did this happen?")
-                return {"CANCELLED"}
-        if verts:
-            shapes.append(verts)
+    
+    scene = bpy.context.scene
+    objects = scene.objects
 
     shape_param_template = (
         "                    ShapeParam_{}: !obj\n"
@@ -160,18 +110,25 @@ def generate_physics(context, filepath, binary=False):
     )
     vertex_template = "                      vertex_{}: !vec3 [{}, {}, {}]"
     shapes_result = ""
-    for i, shape in enumerate(shapes):
-        shapes_result += shape_param_template.format(
-            i,
-            len(shape),
-            "\n".join(
-                [
-                    vertex_template.format(o, vert[0], vert[1], vert[2])
-                    for o, vert in enumerate(shape)
-                ]
-            ),
-        )
-    output = content.format(len(shapes), shapes_result.rstrip("\n"))
+    mask = "_hull" if vhacd else ""
+    objs_to_remove = []
+    for i, obj in enumerate(objects):
+        if obj.type == "MESH":
+            if not (mask in obj.name): continue
+            objs_to_remove.append(obj)
+            mtx = mathutils.Matrix.Rotation(radians(-90.0), 4, 'X') @ obj.matrix_world
+            verts = [mtx@v.co for v in obj.data.vertices]
+            shapes_result += shape_param_template.format(
+                i,
+                len(verts),
+                "\n".join(
+                    [
+                        vertex_template.format(o, co.x, co.y, co.z)
+                        for o, co in enumerate(verts)
+                    ]
+                ),
+            )
+    output = content.format(len(objects), shapes_result.rstrip("\n"))
     with open(filepath_yml, "w") as output_file:
         output_file.write(output)
 
@@ -187,7 +144,11 @@ def generate_physics(context, filepath, binary=False):
             return {"CANCELLED"}
         finally:
             os.remove(filepath_yml)
-    os.remove(filepath_obj)
+    if vhacd and remove_hulls_after_export:
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in objs_to_remove:
+            obj.select_set(True)
+        bpy.ops.object.delete()
     return {"FINISHED"}
 
 
@@ -213,8 +174,27 @@ class ExportPhysics(Operator, ExportHelper):
 
     filter_glob: StringProperty(default="*.physics.yml", options={"HIDDEN"})
 
+    vhacd: BoolProperty(
+        name='Use V-HACD',
+        description='Auto-generate collision using V-HACD (Disable if generated manually)',
+        default=True
+    )
+
+    remove_hulls_after_export: BoolProperty(
+        name="Remove hulls after export",
+        description= "Remove convex hulls generated by V-HACD after exporting the physics file",
+        default=False
+    )
+
     def execute(self, context):
-        return generate_physics(context, self.filepath)
+        return generate_physics(context, self.filepath, vhacd=self.vhacd, remove_hulls_after_export=self.remove_hulls_after_export)
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.label(text='Additional options:')
+        col.prop(self, 'vhacd')
+        col.prop(self, 'remove_hulls_after_export')
 
 
 class ExportPhysicsBinary(Operator, ExportHelper):
@@ -226,8 +206,27 @@ class ExportPhysicsBinary(Operator, ExportHelper):
 
     filter_glob: StringProperty(default="*.bphysics", options={"HIDDEN"})
 
+    vhacd: BoolProperty(
+        name='Use V-HACD',
+        description='Auto-generate collision using V-HACD (Disable if generated manually)',
+        default=True
+    )
+
+    remove_hulls_after_export: BoolProperty(
+        name="Remove hulls after export",
+        description= "Remove convex hulls generated by V-HACD after exporting the physics file",
+        default=False
+    )
+
     def execute(self, context):
-        return generate_physics(context, self.filepath, binary=True)
+        return generate_physics(context, self.filepath, binary=True, vhacd=self.vhacd, remove_hulls_after_export=self.remove_hulls_after_export)
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.label(text='Additional options:')
+        col.prop(self, 'vhacd')
+        col.prop(self, 'remove_hulls_after_export')
 
 
 def MenuImport(self, context):
