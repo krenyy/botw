@@ -16,7 +16,7 @@ bl_info = {
     "author": "kreny",
     "description": "",
     "blender": (2, 80, 0),
-    "version": (0, 0, 6),
+    "version": (0, 0, 7),
     "location": "",
     "warning": "",
     "category": "Breath of the Wild",
@@ -76,7 +76,9 @@ def parse_physics(context, filepath):
     return {"FINISHED"}
 
 
-def generate_physics(context, filepath, binary=False, vhacd=True, remove_hulls_after_export=False):
+def generate_physics(context, filepath, vhacd, remove_hulls_after_export, binary=False):
+    scene = bpy.context.scene
+
     if vhacd:
         try:
             bpy.ops.object.select_all(action='SELECT')
@@ -84,6 +86,12 @@ def generate_physics(context, filepath, binary=False, vhacd=True, remove_hulls_a
         except Exception as e:
             ShowMessageBox("V-HACD Error", f"{e}")
             return {"CANCELLED"}
+    else:
+        objects = [obj for obj in scene.objects if "_hull_" in obj.name]
+        if not objects:
+            ShowMessageBox("No convex hulls found", "You probably didn't generate your collisions, dummy.")
+            return {"CANCELLED"}
+
     if binary:
         filepath_yml = filepath.replace(".bphysics", ".physics.yml")
         filepath_bin = filepath
@@ -94,9 +102,47 @@ def generate_physics(context, filepath, binary=False, vhacd=True, remove_hulls_a
     default_file = directory + "/default.yml"
     with open(default_file, "r") as f:
         content = f.read()
-    
-    scene = bpy.context.scene
-    objects = scene.objects
+
+    rigid_body_template = (
+        "                RigidBody_{0}: !list\n"
+        "                  objects:\n"
+        "                    948250248: !obj\n"
+        "                      rigid_body_name: !str64 {1}\n"
+        "                      mass: 10000.0\n"
+        "                      inertia: !vec3 [6666.67, 6666.67, 6666.67]\n"
+        "                      linear_damping: 0.0\n"
+        "                      angular_damping: 0.05\n"
+        "                      max_impulse: 10000.0\n"
+        "                      col_impulse_scale: 1.0\n"
+        "                      ignore_normal_for_impulse: false\n"
+        "                      volume: 8.0\n"
+        "                      toi: true\n"
+        "                      center_of_mass: !vec3 [0.0, 1.0, 0.0]\n"
+        "                      max_linear_velocity: 200.0\n"
+        "                      bounding_center: !vec3 [0.0, 1.0, 0.0]\n"
+        "                      bounding_extents: !vec3 [2.0, 2.0, 2.0]\n"
+        "                      max_angular_velocity_rad: 198.968\n"
+        "                      motion_type: !str32 Fixed\n"
+        "                      contact_point_info: !str32 Body\n"
+        "                      collision_info: !str32 Body\n"
+        "                      bone: !str64 \n"
+        "                      water_buoyancy_scale: 1.0\n"
+        "                      water_flow_effective_rate: 1.0\n"
+        "                      layer: !str32 EntityGroundObject\n"
+        "                      no_hit_ground: false\n"
+        "                      no_hit_water: false\n"
+        "                      groundhit: !str32 HitAll\n"
+        "                      use_ground_hit_type_mask: false\n"
+        "                      no_char_standing_on: false\n"
+        "                      navmesh: !str32 STATIC_WALKABLE_AND_CUTTING\n"
+        "                      navmesh_sub_material: !str32 \n"
+        "                      link_matrix: ''\n"
+        "                      magne_mass_scaling_factor: 1.0\n"
+        "                      always_character_mass_scaling: false\n"
+        "                      shape_num: {2}\n"
+        "{3}\n"
+        "                  lists: {{}}"
+    )
 
     shape_param_template = (
         "                    ShapeParam_{}: !obj #{}\n"
@@ -108,30 +154,40 @@ def generate_physics(context, filepath, binary=False, vhacd=True, remove_hulls_a
         "                      wall_code: !str32 NoClimb\n"
         "                      floor_code: !str32 None\n"
     )
+
     vertex_template = "                      vertex_{}: !vec3 [{}, {}, {}]"
-    shapes_result = ""
-    shape_index = 0
-    mask = "_hull" if vhacd else ""
-    objs_to_remove = []
-    for obj in objects:
+
+    result = ""
+
+    rigid_bodies = ""
+
+    non_hull_objects = [obj for obj in scene.objects if not ("_hull_" in obj.name)]
+    non_hull_index = 0
+    hulls = []
+    for obj in non_hull_objects:
         if obj.type == "MESH":
-            if not (mask in obj.name): continue
-            objs_to_remove.append(obj)
-            mtx = mathutils.Matrix.Rotation(radians(-90.0), 4, 'X') @ obj.matrix_world
-            verts = [mtx@v.co for v in obj.data.vertices]
-            shapes_result += shape_param_template.format(
-                shape_index,
-                obj.name,
-                len(verts),
-                "\n".join(
-                    [
-                        vertex_template.format(o, co.x, co.y, co.z)
-                        for o, co in enumerate(verts)
-                    ]
-                ),
-            )
-            shape_index +=1
-    output = content.format(shape_index, shapes_result.rstrip("\n"))
+            shape_hull_index = 0
+            shapes = ""
+            for shape_hull in set(scene.objects) - set(non_hull_objects):
+                if not (shape_hull.name.split("_hull_")[0] == obj.name): continue
+                hulls.append(shape_hull)
+                mtx = mathutils.Matrix.Rotation(radians(-90.0), 4, 'X') @ shape_hull.matrix_world
+                verts = [mtx@v.co for v in shape_hull.data.vertices]
+                shapes += shape_param_template.format(
+                    shape_hull_index,
+                    shape_hull.name,
+                    len(verts),
+                    "\n".join(
+                        [
+                            vertex_template.format(o, co.x, co.y, co.z)
+                            for o, co in enumerate(verts)
+                        ]
+                    ),
+                )
+                shape_hull_index += 1
+            rigid_bodies += rigid_body_template.format(non_hull_index, obj.name, shape_hull_index, shapes)
+            non_hull_index += 1
+    output = content.format(non_hull_index, rigid_bodies.rstrip("\n"))
     with open(filepath_yml, "w") as output_file:
         output_file.write(output)
 
@@ -149,8 +205,8 @@ def generate_physics(context, filepath, binary=False, vhacd=True, remove_hulls_a
             os.remove(filepath_yml)
     if vhacd and remove_hulls_after_export:
         bpy.ops.object.select_all(action='DESELECT')
-        for obj in objs_to_remove:
-            obj.select_set(True)
+        for hull in hulls:
+            hull.select_set(True)
         bpy.ops.object.delete()
     return {"FINISHED"}
 
