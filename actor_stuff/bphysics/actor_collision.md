@@ -68,18 +68,18 @@ RigidBody_0: !list
 ---
 There are quite a few things to note:
 
-| Parameter       |        Description        | Values                             |
-| --------------- | :-----------------------: | ---------------------------------- |
-| rigid_body_name |      Rigid body name      | String                             |
-| motion_type     |    Actor movement type    | [String](params/motion_types.yml)  |
-| shape_num       |     number of shapes      | Integer (more info below)          |
-| shape_type      |     basic shape type      | [String](params/shape_types.yml)   |
-| vertex_num      |    number of vertices     | Integer (more info below)          |
-| vertex_x        |    vertex coordinates     | Vector3 (more info below)          |
-| material        |   material of the shape   | [String](params/materials.yml)     |
-| sub_material    | sub material of the shape | [String](params/sub_materials.yml) |
-| wall_code       |  wall code of the shape   | [String](params/wall_codes.yml)    |
-| floor_code      |  floor code of the shape  | [String](params/floor_codes.yml)   |
+| Parameter       |        Description        | Values                            |
+| --------------- | :-----------------------: | --------------------------------- |
+| rigid_body_name |      Rigid body name      | String                            |
+| motion_type     |    Actor movement type    | [String](params/motion_type.yml)  |
+| shape_num       |     number of shapes      | Integer (more info below)         |
+| shape_type      |     basic shape type      | [String](params/shape_type.yml)   |
+| vertex_num      |    number of vertices     | Integer (more info below)         |
+| vertex_x        |    vertex coordinates     | Vector3 (more info below)         |
+| material        |   material of the shape   | [String](params/material.yml)     |
+| sub_material    | sub material of the shape | [String](params/sub_material.yml) |
+| wall_code       |  wall code of the shape   | [String](params/wall_code.yml)    |
+| floor_code      |  floor code of the shape  | [String](params/floor_code.yml)   |
 
 for more parameters click [here](params)
 ___
@@ -91,11 +91,9 @@ Considering the collision is defined by **vertices** alone (which means you can 
 <img src=res/collision-error.png width="400">
 ___
 ## Shapes and vertices
-Each `vertex_{}` point defines a single point in a 3-dimensional space.
+Each `vertex_{}` defines a single point in a 3-dimensional space.
 
-I wrote a [Blender addon](blenderaddon-botw-physics-generator.zip) for exporting objects as separate shapes. For simple shapes (cubes, stairs), split them yourself for better accuracy.
-
-For more complex ones, use [V-HACD Blender addon](https://github.com/andyp123/blender_vhacd). Here's an example of generated convex geometry:
+I wrote a [Blender addon](https://github.com/23kreny/blenderaddon_botw-physics-generator/releases) for exporting objects as separate shapes. It requires [V-HACD Blender addon](https://github.com/andyp123/blender_vhacd). Here's an example of generated convex geometry:
 
 <img src=res/example.png width="400">
 
