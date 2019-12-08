@@ -32,5 +32,5 @@ for pair in sorted_mat_pairs:
     lines += "\n".join(pair)
 lines += "\n"
 
-with open("../confirmed_material_pairs.yml", "w") as f:
+with open(os.path.join(os.getcwd(), "confirmed_material_pairs.yml"), "w") as f:
     f.write(lines)
