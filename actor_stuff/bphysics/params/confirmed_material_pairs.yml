@@ -1,0 +1,125 @@
+Confirmed material pair number: 41
+
+
+material: !str32 AirWall
+sub_material: !str32 AirWall
+
+material: !str32 Barrier
+sub_material: !str32 PriestWall
+
+material: !str32 Bone
+sub_material: !str32 Bone
+
+material: !str32 CharControl
+sub_material: !str32 CharControl
+
+material: !str32 Cloth
+sub_material: !str32 Cloth
+
+material: !str32 Cloth
+sub_material: !str32 Cloth_Leather
+
+material: !str32 Conveyer
+sub_material: !str32 Conveyer
+
+material: !str32 Glass
+sub_material: !str32 Glass
+
+material: !str32 Grass
+sub_material: !str32 Grass
+
+material: !str32 Grass
+sub_material: !str32 Grass_Leaf
+
+material: !str32 Grass
+sub_material: !str32 Grass_Long
+
+material: !str32 Grudge
+sub_material: !str32 Grudge
+
+material: !str32 GuardianFoot
+sub_material: !str32 GuardianFoot
+
+material: !str32 Ice
+sub_material: !str32 Ice
+
+material: !str32 Ice
+sub_material: !str32 Ice_Hard
+
+material: !str32 LaunchPad
+sub_material: !str32 LaunchPad
+
+material: !str32 Lava
+sub_material: !str32 Lava
+
+material: !str32 MagicBall
+sub_material: !str32 MagicBall
+
+material: !str32 Meat
+sub_material: !str32 Meat
+
+material: !str32 Metal
+sub_material: !str32 Metal
+
+material: !str32 Metal
+sub_material: !str32 Metal_Heavy
+
+material: !str32 Metal
+sub_material: !str32 Metal_Light
+
+material: !str32 Misc
+sub_material: !str32 Misc
+
+material: !str32 Ragdoll
+sub_material: !str32 Ragdoll
+
+material: !str32 Rope
+sub_material: !str32 Rope
+
+material: !str32 Snow
+sub_material: !str32 Snow
+
+material: !str32 Soil
+sub_material: !str32 Soil
+
+material: !str32 Stone
+sub_material: !str32 Stone
+
+material: !str32 Stone
+sub_material: !str32 Stone_DgnHeavy
+
+material: !str32 Stone
+sub_material: !str32 Stone_DgnLight
+
+material: !str32 Stone
+sub_material: !str32 Stone_Heavy
+
+material: !str32 Stone
+sub_material: !str32 Stone_Light
+
+material: !str32 Stone
+sub_material: !str32 Stone_Marble
+
+material: !str32 Surfing
+sub_material: !str32 Surfing
+
+material: !str32 Undefined
+sub_material: !str32 Undefined
+
+material: !str32 Vegetable
+sub_material: !str32 Vegetable
+
+material: !str32 Water
+sub_material: !str32 Water
+
+material: !str32 WireNet
+sub_material: !str32 WireNet
+
+material: !str32 Wood
+sub_material: !str32 Wood
+
+material: !str32 Wood
+sub_material: !str32 Wood_Thick
+
+material: !str32 Wood
+sub_material: !str32 Wood_Thin
